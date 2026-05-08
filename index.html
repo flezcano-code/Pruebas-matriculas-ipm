@@ -564,7 +564,7 @@ function abrirReporte(i){
     const hora =
         String(ahora.getHours()).padStart(2,'0');
 
-    const minuto =
+    const minutos =
         String(ahora.getMinutes()).padStart(2,'0');
 
     const w = window.open(
@@ -574,9 +574,7 @@ function abrirReporte(i){
     );
 
     w.document.write(`
-
     <html>
-
     <head>
 
     <title>Declaración Accidente Escolar</title>
@@ -586,80 +584,80 @@ function abrirReporte(i){
     body{
         font-family:Arial;
         background:white;
-        padding:25px;
-        color:black;
-    }
-
-    .page{
-        border:3px solid black;
+        margin:0;
         padding:20px;
     }
 
-    .title{
-        text-align:center;
-        font-size:26px;
-        font-weight:bold;
-        letter-spacing:3px;
-        margin-bottom:25px;
-    }
-
-    .section-title{
-        font-weight:bold;
+    .page{
+        width:1100px;
+        margin:auto;
         border:2px solid black;
-        padding:8px;
-        margin-top:15px;
-        margin-bottom:15px;
-        background:#efefef;
+        padding:15px;
     }
 
-    .row{
+    .top{
         display:flex;
-        gap:10px;
+        align-items:center;
+        justify-content:space-between;
         margin-bottom:10px;
     }
 
-    .field{
+    .logo{
+        height:90px;
+    }
+
+    .titulo{
+        text-align:center;
+        font-size:28px;
+        letter-spacing:4px;
+        font-weight:bold;
         flex:1;
     }
 
-    label{
-        display:block;
+    table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:5px;
         font-size:12px;
-        margin-bottom:4px;
+    }
+
+    td{
+        border:1px solid black;
+        padding:5px;
+        vertical-align:top;
+    }
+
+    .section{
+        background:#e5e5e5;
         font-weight:bold;
+        text-align:center;
     }
 
     input, textarea{
         width:100%;
-        border:1px solid black;
-        padding:6px;
-        font-size:13px;
-        box-sizing:border-box;
+        border:none;
+        outline:none;
+        font-size:12px;
+        font-family:Arial;
     }
 
     textarea{
-        height:180px;
-        resize:vertical;
+        height:120px;
+        resize:none;
     }
 
-    .small{
-        flex:0.4;
-    }
-
-    .medium{
-        flex:0.7;
-    }
-
-    .large{
-        flex:2;
+    .firma{
+        margin-top:40px;
+        text-align:right;
+        padding-right:40px;
     }
 
     .print{
-        margin-top:25px;
-        padding:12px 18px;
-        border:none;
+        margin-top:20px;
+        padding:10px 15px;
         background:#0b6b2e;
         color:white;
+        border:none;
         cursor:pointer;
         font-size:15px;
     }
@@ -687,172 +685,220 @@ function abrirReporte(i){
 
     <div class="page">
 
-    <div class="title">
-        DECLARACION INDIVIDUAL DE ACCIDENTE ESCOLAR
-    </div>
+        <div class="top">
 
-    <div class="section-title">
-        INDIVIDUALIZACIÓN DEL ESTABLECIMIENTO
-    </div>
+            <img src="gob.png" class="logo">
 
-    <div class="row">
+            <div class="titulo">
+                DECLARACIÓN INDIVIDUAL DE ACCIDENTE ESCOLAR
+            </div>
 
-        <div class="large field">
-            <label>NOMBRE ESTABLECIMIENTO</label>
-            <input value="ESCUELA ISABEL PEÑA MORALES">
         </div>
 
-        <div class="medium field">
-            <label>CURSO</label>
-            <input value="${safe(d["Curso"])}">
+        <table>
+
+            <tr>
+                <td colspan="6" class="section">
+                    INDIVIDUALIZACIÓN DEL ESTABLECIMIENTO
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3">
+                    NOMBRE ESTABLECIMIENTO<br>
+                    <input value="ESCUELA ISABEL PEÑA MORALES">
+                </td>
+
+                <td>
+                    CIUDAD<br>
+                    <input value="COPIAPÓ">
+                </td>
+
+                <td>
+                    COMUNA<br>
+                    <input value="COPIAPÓ">
+                </td>
+
+                <td>
+                    CURSO<br>
+                    <input value="${safe(d["Curso"])}">
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="6" class="section">
+                    INDIVIDUALIZACIÓN DEL ACCIDENTADO
+                </td>
+            </tr>
+
+            <tr>
+
+                <td colspan="2">
+                    APELLIDOS Y NOMBRES<br>
+                    <input value="${safe(d["Estudiante"])}">
+                </td>
+
+                <td>
+                    RUN<br>
+                    <input value="${safe(d["RUN / IPE"])}">
+                </td>
+
+                <td>
+                    SEXO<br>
+                    <input value="${safe(d["Sexo"])}">
+                </td>
+
+                <td>
+                    FECHA NACIMIENTO<br>
+                    <input value="${safe(d["Fecha Nacimiento"])}">
+                </td>
+
+                <td>
+                    TELÉFONO<br>
+                    <input value="${safe(d["Teléfono"])}">
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td colspan="4">
+                    DOMICILIO<br>
+                    <input value="${safe(d["Domicilio"])}">
+                </td>
+
+                <td colspan="2">
+                    COMUNA<br>
+                    <input value="${safe(d["Comuna"])}">
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="6" class="section">
+                    INFORME SOBRE EL ACCIDENTE
+                </td>
+            </tr>
+
+            <tr>
+
+                <td>
+                    HORA<br>
+                    <input value="${hora}">
+                </td>
+
+                <td>
+                    MINUTOS<br>
+                    <input value="${minutos}">
+                </td>
+
+                <td>
+                    FECHA<br>
+                    <input value="${fecha}">
+                </td>
+
+                <td colspan="3">
+                    LUGAR DEL ACCIDENTE<br>
+                    <input>
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td colspan="3">
+                    TESTIGO 1<br>
+                    <input>
+                </td>
+
+                <td colspan="3">
+                    TESTIGO 2<br>
+                    <input>
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td colspan="6">
+                    CIRCUNSTANCIA DEL ACCIDENTE<br>
+
+                    <textarea></textarea>
+
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="6" class="section">
+                    APODERADO
+                </td>
+            </tr>
+
+            <tr>
+
+                <td colspan="2">
+                    APODERADO TITULAR<br>
+                    <input value="${safe(d["Nombre Apoderado TITULAR"])}">
+                </td>
+
+                <td>
+                    RUT<br>
+                    <input value="${safe(d["RUT  TITULAR"])}">
+                </td>
+
+                <td>
+                    TELÉFONO<br>
+                    <input value="${safe(d["Teléfono  TITULAR"])}">
+                </td>
+
+                <td colspan="2">
+                    EMAIL<br>
+                    <input value="${safe(d["Correo Electrónico  TITULAR"])}">
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td colspan="2">
+                    APODERADO SUPLENTE<br>
+                    <input value="${safe(d["Nombre Apoderado SUPLENTE"])}">
+                </td>
+
+                <td>
+                    RUT<br>
+                    <input value="${safe(d["RUT SUPLENTE"])}">
+                </td>
+
+                <td>
+                    TELÉFONO<br>
+                    <input value="${safe(d["Teléfono SUPLENTE"])}">
+                </td>
+
+                <td colspan="2">
+                    EMAIL<br>
+                    <input value="${safe(d["Correo Electrónico SUPLENTE"])}">
+                </td>
+
+            </tr>
+
+        </table>
+
+        <div class="firma">
+
+            ___________________________<br>
+            FIRMA Y TIMBRE
+
         </div>
 
-    </div>
-
-    <div class="section-title">
-        INDIVIDUALIZACIÓN DEL ACCIDENTADO
-    </div>
-
-    <div class="row">
-
-        <div class="field">
-            <label>ESTUDIANTE</label>
-            <input value="${safe(d["Estudiante"])}">
-        </div>
-
-        <div class="field">
-            <label>RUN</label>
-            <input value="${safe(d["RUN / IPE"])}">
-        </div>
-
-    </div>
-
-    <div class="row">
-
-        <div class="field">
-            <label>FECHA NACIMIENTO</label>
-            <input value="${safe(d["Fecha Nacimiento"])}">
-        </div>
-
-        <div class="field">
-            <label>SEXO</label>
-            <input value="${safe(d["Sexo"])}">
-        </div>
-
-        <div class="field">
-            <label>TELÉFONO</label>
-            <input value="${safe(d["Teléfono"])}">
-        </div>
-
-    </div>
-
-    <div class="row">
-
-        <div class="large field">
-            <label>DOMICILIO</label>
-            <input value="${safe(d["Domicilio"])}">
-        </div>
-
-        <div class="medium field">
-            <label>COMUNA</label>
-            <input value="${safe(d["Comuna"])}">
-        </div>
-
-    </div>
-
-    <div class="section-title">
-        INFORME SOBRE EL ACCIDENTE
-    </div>
-
-    <div class="row">
-
-        <div class="small field">
-            <label>HORA</label>
-            <input value="${hora}">
-        </div>
-
-        <div class="small field">
-            <label>MINUTO</label>
-            <input value="${minuto}">
-        </div>
-
-        <div class="medium field">
-            <label>FECHA</label>
-            <input value="${fecha}">
-        </div>
-
-        <div class="large field">
-            <label>LUGAR DEL ACCIDENTE</label>
-            <input>
-        </div>
-
-    </div>
-
-    <div class="row">
-
-        <div class="field">
-            <label>TESTIGO 1</label>
-            <input>
-        </div>
-
-        <div class="field">
-            <label>RUN TESTIGO 1</label>
-            <input>
-        </div>
-
-    </div>
-
-    <div class="row">
-
-        <div class="field">
-            <label>TESTIGO 2</label>
-            <input>
-        </div>
-
-        <div class="field">
-            <label>RUN TESTIGO 2</label>
-            <input>
-        </div>
-
-    </div>
-
-    <div class="section-title">
-        CIRCUNSTANCIAS DEL ACCIDENTE
-    </div>
-
-    <textarea></textarea>
-
-    <div class="section-title">
-        APODERADO
-    </div>
-
-    <div class="row">
-
-        <div class="large field">
-            <label>NOMBRE APODERADO TITULAR</label>
-            <input value="${safe(d["Nombre Apoderado TITULAR"])}">
-        </div>
-
-        <div class="medium field">
-            <label>RUT</label>
-            <input value="${safe(d["RUT  TITULAR"])}">
-        </div>
-
-        <div class="medium field">
-            <label>TELÉFONO</label>
-            <input value="${safe(d["Teléfono  TITULAR"])}">
-        </div>
-
-    </div>
-
-    <button class="print" onclick="window.print()">
-        Imprimir / Guardar PDF
-    </button>
+        <button class="print" onclick="window.print()">
+            Imprimir / Guardar PDF
+        </button>
 
     </div>
 
     </body>
-
     </html>
     `);
 }

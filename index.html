@@ -614,10 +614,10 @@ function abrirReporte(i){
 
     const fecha =
         String(ahora.getDate()).padStart(2,'0')
-        + "-"
+        + "/"
         +
         String(ahora.getMonth()+1).padStart(2,'0')
-        + "-"
+        + "/"
         +
         ahora.getFullYear();
 
@@ -626,6 +626,19 @@ function abrirReporte(i){
 
     const minuto =
         String(ahora.getMinutes()).padStart(2,'0');
+
+    const dias = [
+        "DOMINGO",
+        "LUNES",
+        "MARTES",
+        "MIERCOLES",
+        "JUEVES",
+        "VIERNES",
+        "SABADO"
+    ];
+
+    const diaSemana =
+        dias[ahora.getDay()];
 
     const w =
         window.open(
@@ -639,50 +652,87 @@ function abrirReporte(i){
 
     <head>
 
-    <title>Reporte Accidente</title>
+    <title>Declaración Accidente Escolar</title>
 
     <style>
 
     body{
         font-family:Arial;
-        background:#f5f5f5;
-        padding:20px;
-    }
-
-    h2{
-        color:#0b6b2e;
-    }
-
-    .box{
+        padding:25px;
         background:white;
+        color:black;
+    }
+
+    h1{
+        text-align:center;
+        font-size:22px;
+        margin-bottom:25px;
+    }
+
+    .section{
+        border:2px solid black;
         padding:15px;
-        margin-bottom:20px;
-        border:1px solid #ccc;
+        margin-bottom:15px;
+    }
+
+    .section-title{
+        font-weight:bold;
+        margin-bottom:15px;
+        background:#eee;
+        padding:8px;
     }
 
     .grid{
         display:grid;
-        grid-template-columns:repeat(4,1fr);
-        gap:10px;
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
     }
 
-    input, textarea{
+    .grid-4{
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:12px;
+    }
+
+    label{
+        font-weight:bold;
+        display:block;
+        margin-bottom:5px;
+    }
+
+    input, textarea, select{
+
         width:100%;
         padding:8px;
+        border:1px solid #999;
         box-sizing:border-box;
+        font-size:14px;
     }
 
     textarea{
-        height:180px;
+        min-height:180px;
         resize:vertical;
     }
 
-    button{
-        padding:10px 20px;
-        background:#15803d;
+    .print{
+        margin-top:20px;
+        padding:12px 20px;
+        background:#0b6b2e;
         color:white;
         border:none;
         cursor:pointer;
+        font-size:16px;
+    }
+
+    @media print{
+
+        .print{
+            display:none;
+        }
+
+        body{
+            padding:0;
+        }
     }
 
     </style>
@@ -691,69 +741,172 @@ function abrirReporte(i){
 
     <body>
 
-    <h2>REPORTE DE ACCIDENTE</h2>
+    <h1>
+        DECLARACIÓN INDIVIDUAL DE ACCIDENTE ESCOLAR
+    </h1>
 
-    <div class="box">
+    <div class="section">
+
+        <div class="section-title">
+            INDIVIDUALIZACIÓN DEL ESTABLECIMIENTO
+        </div>
 
         <div class="grid">
 
             <div>
-                <b>Alumno</b>
-                <input value="${safe(d["Estudiante"])}">
+                <label>Establecimiento</label>
+                <input value="ESCUELA ISABEL PEÑA MORALES">
             </div>
 
             <div>
-                <b>Curso</b>
+                <label>Comuna</label>
+                <input value="COPIAPÓ">
+            </div>
+
+            <div>
+                <label>Curso</label>
                 <input value="${safe(d["Curso"])}">
             </div>
 
             <div>
-                <b>RUN</b>
-                <input value="${safe(d["RUN / IPE"])}">
-            </div>
-
-            <div>
-                <b>Fecha</b>
-                <input value="${fecha}">
-            </div>
-
-            <div>
-                <b>Hora</b>
-                <input value="${hora}">
-            </div>
-
-            <div>
-                <b>Minuto</b>
-                <input value="${minuto}">
+                <label>Horario</label>
+                <input value="DIURNO">
             </div>
 
         </div>
 
     </div>
 
-    <div class="box">
+    <div class="section">
 
-        <h3>Testigos</h3>
+        <div class="section-title">
+            INDIVIDUALIZACIÓN DEL ACCIDENTADO
+        </div>
 
         <div class="grid">
 
             <div>
-                <b>Testigo 1</b>
+                <label>Nombre Completo</label>
+                <input value="${safe(d["Estudiante"])}">
+            </div>
+
+            <div>
+                <label>RUN</label>
+                <input value="${safe(d["RUN / IPE"])}">
+            </div>
+
+            <div>
+                <label>Fecha Nacimiento</label>
+                <input value="${safe(d["Fecha Nacimiento"])}">
+            </div>
+
+            <div>
+                <label>Sexo</label>
+                <input value="${safe(d["Sexo"])}">
+            </div>
+
+            <div>
+                <label>Domicilio</label>
+                <input value="${safe(d["Domicilio"])}">
+            </div>
+
+            <div>
+                <label>Comuna</label>
+                <input value="${safe(d["Comuna"])}">
+            </div>
+
+            <div>
+                <label>Teléfono</label>
+                <input value="${safe(d["Teléfono"])}">
+            </div>
+
+            <div>
+                <label>Correo</label>
+                <input value="${safe(d["Correo Electrónico"])}">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <div class="section-title">
+            INFORME SOBRE EL ACCIDENTE
+        </div>
+
+        <div class="grid-4">
+
+            <div>
+                <label>Hora</label>
+                <input value="${hora}">
+            </div>
+
+            <div>
+                <label>Minuto</label>
+                <input value="${minuto}">
+            </div>
+
+            <div>
+                <label>Fecha</label>
+                <input value="${fecha}">
+            </div>
+
+            <div>
+                <label>Día</label>
+                <input value="${diaSemana}">
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="grid">
+
+            <div>
+                <label>Tipo de Accidente</label>
+
+                <select>
+
+                    <option>
+                        En la Escuela
+                    </option>
+
+                    <option>
+                        Trayecto
+                    </option>
+
+                </select>
+            </div>
+
+            <div>
+                <label>Lugar del Accidente</label>
+                <input>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="grid">
+
+            <div>
+                <label>Testigo 1</label>
                 <input>
             </div>
 
             <div>
-                <b>RUT</b>
+                <label>RUN Testigo 1</label>
                 <input>
             </div>
 
             <div>
-                <b>Testigo 2</b>
+                <label>Testigo 2</label>
                 <input>
             </div>
 
             <div>
-                <b>RUT</b>
+                <label>RUN Testigo 2</label>
                 <input>
             </div>
 
@@ -761,16 +914,50 @@ function abrirReporte(i){
 
     </div>
 
-    <div class="box">
+    <div class="section">
 
-        <h3>Circunstancia del accidente</h3>
+        <div class="section-title">
+            CIRCUNSTANCIA DEL ACCIDENTE
+        </div>
 
-        <textarea></textarea>
+        <textarea
+        placeholder="Describa cómo ocurrió el accidente...">
+        </textarea>
 
     </div>
 
-    <button onclick="window.print()">
+    <div class="section">
+
+        <div class="section-title">
+            APODERADO
+        </div>
+
+        <div class="grid">
+
+            <div>
+                <label>Nombre Apoderado Titular</label>
+
+                <input
+                value="${safe(d["Nombre Apoderado TITULAR"])}">
+            </div>
+
+            <div>
+                <label>Teléfono</label>
+
+                <input
+                value="${safe(d["Teléfono  TITULAR"])}">
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+    class="print"
+    onclick="window.print()">
+
         Imprimir / Guardar PDF
+
     </button>
 
     </body>

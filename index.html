@@ -607,15 +607,6 @@ function loginReporte(i){
 
 /* REPORT */
 function abrirReporte(i){
-            <label>TESTIGO 1</label>
-            <input>
-        </div>
-
-        <div class="field">
-            <label>RUN TESTIGO 1</label>
-            <input>
-        </div>
-
     </div>
 
 
@@ -678,35 +669,3 @@ function abrirReporte(i){
 
     `);
 }
-
-/* SAFE */
-function safe(text){
-
-    if(!text) return "";
-
-    return text.toString()
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;");
-}
-
-/* EVENTOS */
-document.getElementById("buscar")
-.addEventListener("input", () => {
-
-    pagina = 1;
-
-    render();
-});
-
-document.getElementById("filtroCurso")
-.addEventListener("change", () => {
-
-    pagina = 1;
-
-    render();
-});
-
-</script>
-
-</body>
-</html>

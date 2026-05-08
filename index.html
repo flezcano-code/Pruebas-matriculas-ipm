@@ -5,16 +5,14 @@
 <title>Sistema Matrículas</title>
 
 <style>
-
-body{
-    font-family:Arial;
+body {
+    font-family: Arial;
     background:#eef2f7;
     margin:0;
 }
 
 /* HEADER */
-
-.header{
+.header {
     background:#0b6b2e;
     color:white;
     padding:15px 25px;
@@ -23,64 +21,61 @@ body{
     justify-content:space-between;
 }
 
-.header-left{
+.header-left {
     display:flex;
     align-items:center;
     gap:15px;
 }
 
-.logo{
+.logo {
     height:70px;
 }
 
-.titulo{
+.titulo {
     font-size:22px;
     font-weight:bold;
 }
 
 /* CONTENIDO */
-
-.container{
+.container {
     padding:20px;
 }
 
-.filtros{
+.filtros {
     display:flex;
     gap:10px;
     margin-bottom:15px;
 }
 
-input, select{
+input, select {
     padding:8px;
 }
 
-.contador{
+.contador {
     margin-bottom:10px;
     font-weight:bold;
 }
 
 /* TABLA */
-
-table{
+table {
     width:100%;
     background:white;
     border-collapse:collapse;
 }
 
-th{
+th {
     background:#14532d;
     color:white;
     padding:10px;
 }
 
-td{
+td {
     padding:8px;
     border-bottom:1px solid #eee;
 }
 
 /* BOTONES */
-
-button{
+button {
     padding:5px 10px;
     background:#15803d;
     color:white;
@@ -89,20 +84,18 @@ button{
     margin-right:5px;
 }
 
-button:hover{
+button:hover {
     background:#166534;
 }
 
-/* PAGINACION */
-
-#paginacion{
+/* PAGINACIÓN */
+#paginacion {
     margin-top:15px;
 }
 
-#paginacion button{
+#paginacion button {
     margin-right:5px;
 }
-
 </style>
 </head>
 
@@ -146,7 +139,7 @@ button:hover{
                 <th>Estudiante</th>
                 <th>RUN</th>
                 <th>Curso</th>
-                <th>Acciones</th>
+                <th>Revisión</th>
             </tr>
         </thead>
 
@@ -159,18 +152,15 @@ button:hover{
 </div>
 
 <!-- PAPAPARSE -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
 
 /* CSV ALUMNOS */
-
 const URL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vSrlMaCB2BM5BjhtKoOCYZS4QJsSL7ZFPXefiDQYN4KZhyh6kyYd5wZQYOKfcueyTiM5NDOPU5_MN6E/pub?gid=0&single=true&output=csv";
 
 /* CSV LOGIN */
-
 const LOGIN_URL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vSrlMaCB2BM5BjhtKoOCYZS4QJsSL7ZFPXefiDQYN4KZhyh6kyYd5wZQYOKfcueyTiM5NDOPU5_MN6E/pub?gid=763610446&single=true&output=csv";
 
@@ -181,14 +171,12 @@ let pagina = 1;
 const porPagina = 20;
 
 /* CARGAR ALUMNOS */
-
 Papa.parse(URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
 
-    download:true,
-    header:true,
-    skipEmptyLines:true,
-
-    complete:function(results){
+    complete: function(results) {
 
         data = results.data;
 
@@ -196,27 +184,22 @@ Papa.parse(URL, {
 
         render();
     }
-
 });
 
 /* CARGAR LOGIN */
-
 Papa.parse(LOGIN_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
 
-    download:true,
-    header:true,
-    skipEmptyLines:true,
-
-    complete:function(results){
+    complete: function(results) {
 
         loginData = results.data;
 
     }
-
 });
 
-/* CURSOS */
-
+/* CARGAR CURSOS */
 function cargarCursos(){
 
     const select =
@@ -235,11 +218,9 @@ function cargarCursos(){
         </option>`;
 
     });
-
 }
 
 /* RENDER */
-
 function render(){
 
     const b =
@@ -274,17 +255,16 @@ function render(){
             d["Curso"] === cursoFiltro;
 
         return coincideTexto && coincideCurso;
-
     });
 
-    document.getElementById("contador")
-    .innerText =
-    "Total alumnos: " + filtrado.length;
+    document.getElementById("contador").innerText =
+        "Total alumnos: " + filtrado.length;
 
     tabla.innerHTML = "";
 
     let datosMostrar;
 
+    /* CURSO = TODO */
     if(cursoFiltro){
 
         datosMostrar = filtrado;
@@ -292,7 +272,9 @@ function render(){
         document.getElementById("paginacion")
         .innerHTML = "";
 
-    }else{
+    } else {
+
+        /* GENERAL = PAGINADO */
 
         const inicio =
             (pagina - 1) * porPagina;
@@ -304,12 +286,12 @@ function render(){
             filtrado.slice(inicio, fin);
 
         renderPaginacion(filtrado.length);
-
     }
 
     datosMostrar.forEach(d => {
 
-        const realIndex = data.indexOf(d);
+        const realIndex =
+            data.indexOf(d);
 
         tabla.innerHTML += `
         <tr>
@@ -333,13 +315,10 @@ function render(){
             </td>
 
         </tr>`;
-
     });
-
 }
 
 /* PAGINACION */
-
 function renderPaginacion(total){
 
     const totalPaginas =
@@ -356,9 +335,7 @@ function renderPaginacion(total){
         <button onclick="irPagina(${i})">
             ${i}
         </button>`;
-
     }
-
 }
 
 function irPagina(p){
@@ -366,11 +343,9 @@ function irPagina(p){
     pagina = p;
 
     render();
-
 }
 
 /* REVIEW */
-
 function verDetalle(i){
 
     const d = data[i];
@@ -396,6 +371,7 @@ function verDetalle(i){
 
     w.document.write(`
     <html>
+
     <head>
 
     <title>Ficha Alumno</title>
@@ -409,24 +385,30 @@ function verDetalle(i){
 
     h2{
         color:#0b6b2e;
+        margin-bottom:10px;
     }
 
     .grid{
         display:grid;
         grid-template-columns:repeat(2,1fr);
         gap:10px;
+        margin-top:10px;
     }
 
     .card{
-        background:#f5f5f5;
+        background:#f9fafb;
         padding:10px;
-        border-radius:5px;
+        border-radius:6px;
     }
 
     .seccion{
         margin-top:25px;
-        border-top:2px solid #ddd;
         padding-top:10px;
+        border-top:2px solid #ddd;
+    }
+
+    iframe{
+        border:none;
     }
 
     </style>
@@ -440,62 +422,62 @@ function verDetalle(i){
     <div class="grid">
 
         <div class="card">
-            <b>RUN</b><br>
+            <b>RUN:</b><br>
             ${safe(d["RUN / IPE"])}
         </div>
 
         <div class="card">
-            <b>Nacionalidad</b><br>
+            <b>Nacionalidad:</b><br>
             ${safe(d["Nacionalidad"])}
         </div>
 
         <div class="card">
-            <b>Nombre Social</b><br>
+            <b>Nombre Social:</b><br>
             ${safe(d["Nombre Social"])}
         </div>
 
         <div class="card">
-            <b>Fecha Nacimiento</b><br>
+            <b>Fecha Nacimiento:</b><br>
             ${safe(d["Fecha Nacimiento"])}
         </div>
 
         <div class="card">
-            <b>Sexo</b><br>
+            <b>Sexo:</b><br>
             ${safe(d["Sexo"])}
         </div>
 
         <div class="card">
-            <b>Género</b><br>
+            <b>Género:</b><br>
             ${safe(d["Id. de Género"])}
         </div>
 
         <div class="card">
-            <b>Nivel</b><br>
+            <b>Nivel:</b><br>
             ${safe(d["Nivel"])}
         </div>
 
         <div class="card">
-            <b>Curso</b><br>
+            <b>Curso:</b><br>
             ${safe(d["Curso"])}
         </div>
 
         <div class="card">
-            <b>Domicilio</b><br>
+            <b>Domicilio:</b><br>
             ${safe(d["Domicilio"])}
         </div>
 
         <div class="card">
-            <b>Comuna</b><br>
+            <b>Comuna:</b><br>
             ${safe(d["Comuna"])}
         </div>
 
         <div class="card">
-            <b>Correo</b><br>
+            <b>Correo:</b><br>
             ${safe(d["Correo Electrónico"])}
         </div>
 
         <div class="card">
-            <b>Teléfono</b><br>
+            <b>Teléfono:</b><br>
             ${safe(d["Teléfono"])}
         </div>
 
@@ -508,22 +490,27 @@ function verDetalle(i){
         <div class="grid">
 
             <div class="card">
-                <b>Nombre</b><br>
+                <b>Nombre:</b><br>
                 ${safe(d["Nombre Apoderado TITULAR"])}
             </div>
 
             <div class="card">
-                <b>RUT</b><br>
+                <b>RUT:</b><br>
                 ${safe(d["RUT  TITULAR"])}
             </div>
 
             <div class="card">
-                <b>Teléfono</b><br>
+                <b>Teléfono:</b><br>
                 ${safe(d["Teléfono  TITULAR"])}
             </div>
 
             <div class="card">
-                <b>Email</b><br>
+                <b>Nivel Educacional:</b><br>
+                ${safe(d["Nivel Educacional TITULAR"])}
+            </div>
+
+            <div class="card">
+                <b>Email:</b><br>
                 ${safe(d["Correo Electrónico  TITULAR"])}
             </div>
 
@@ -538,22 +525,22 @@ function verDetalle(i){
         <div class="grid">
 
             <div class="card">
-                <b>Nombre</b><br>
+                <b>Nombre:</b><br>
                 ${safe(d["Nombre Apoderado SUPLENTE"])}
             </div>
 
             <div class="card">
-                <b>RUT</b><br>
+                <b>RUT:</b><br>
                 ${safe(d["RUT SUPLENTE"])}
             </div>
 
             <div class="card">
-                <b>Teléfono</b><br>
+                <b>Teléfono:</b><br>
                 ${safe(d["Teléfono SUPLENTE"])}
             </div>
 
             <div class="card">
-                <b>Email</b><br>
+                <b>Email:</b><br>
                 ${safe(d["Correo Electrónico SUPLENTE"])}
             </div>
 
@@ -568,12 +555,12 @@ function verDetalle(i){
         `
         <div class="seccion">
 
-            <h3>Ficha Alumno</h3>
+            <h3>Ficha del Alumno</h3>
 
             <iframe
                 src="${pdfUrl}"
                 width="100%"
-                height="600">
+                height="500">
             </iframe>
 
         </div>
@@ -582,17 +569,15 @@ function verDetalle(i){
         :
 
         ""
-
     }
 
     </body>
+
     </html>
     `);
-
 }
 
 /* LOGIN REPORT */
-
 function loginReporte(i){
 
     const usuario =
@@ -607,12 +592,9 @@ function loginReporte(i){
 
     const valido = loginData.find(l =>
 
-        l["usuario"] === usuario
-
-        &&
+        l["usuario"] === usuario &&
 
         l["contraseña"] === password
-
     );
 
     if(!valido){
@@ -620,15 +602,12 @@ function loginReporte(i){
         alert("Credenciales incorrectas");
 
         return;
-
     }
 
     abrirReporte(i);
-
 }
 
 /* REPORT */
-
 function abrirReporte(i){
 
     const d = data[i];
@@ -659,6 +638,7 @@ function abrirReporte(i){
 
     w.document.write(`
     <html>
+
     <head>
 
     <title>Reporte Accidente</title>
@@ -695,7 +675,7 @@ function abrirReporte(i){
     }
 
     textarea{
-        height:200px;
+        height:180px;
         resize:vertical;
     }
 
@@ -796,32 +776,28 @@ function abrirReporte(i){
     </button>
 
     </body>
+
     </html>
     `);
-
 }
 
 /* SAFE */
-
 function safe(text){
 
     if(!text) return "";
 
     return text.toString()
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
-
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
 }
 
 /* EVENTOS */
-
 document.getElementById("buscar")
 .addEventListener("input", () => {
 
     pagina = 1;
 
     render();
-
 });
 
 document.getElementById("filtroCurso")
@@ -830,7 +806,6 @@ document.getElementById("filtroCurso")
     pagina = 1;
 
     render();
-
 });
 
 </script>

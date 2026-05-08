@@ -607,362 +607,75 @@ function loginReporte(i){
 
 /* REPORT */
 function abrirReporte(i){
-
-    const d = data[i];
-
-    const ahora = new Date();
-
-    const fecha =
-        String(ahora.getDate()).padStart(2,'0')
-        + "/"
-        +
-        String(ahora.getMonth()+1).padStart(2,'0')
-        + "/"
-        +
-        ahora.getFullYear();
-
-    const hora =
-        String(ahora.getHours()).padStart(2,'0');
-
-    const minuto =
-        String(ahora.getMinutes()).padStart(2,'0');
-
-    const dias = [
-        "DOMINGO",
-        "LUNES",
-        "MARTES",
-        "MIERCOLES",
-        "JUEVES",
-        "VIERNES",
-        "SABADO"
-    ];
-
-    const diaSemana =
-        dias[ahora.getDay()];
-
-    const w =
-        window.open(
-            "",
-            "_blank",
-            "width=1200,height=900"
-        );
-
-    w.document.write(`
-    <html>
-
-    <head>
-
-    <title>Declaración Accidente Escolar</title>
-
-    <style>
-
-    body{
-        font-family:Arial;
-        padding:25px;
-        background:white;
-        color:black;
-    }
-
-    h1{
-        text-align:center;
-        font-size:22px;
-        margin-bottom:25px;
-    }
-
-    .section{
-        border:2px solid black;
-        padding:15px;
-        margin-bottom:15px;
-    }
-
-    .section-title{
-        font-weight:bold;
-        margin-bottom:15px;
-        background:#eee;
-        padding:8px;
-    }
-
-    .grid{
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:12px;
-    }
-
-    .grid-4{
-        display:grid;
-        grid-template-columns:repeat(4,1fr);
-        gap:12px;
-    }
-
-    label{
-        font-weight:bold;
-        display:block;
-        margin-bottom:5px;
-    }
-
-    input, textarea, select{
-
-        width:100%;
-        padding:8px;
-        border:1px solid #999;
-        box-sizing:border-box;
-        font-size:14px;
-    }
-
-    textarea{
-        min-height:180px;
-        resize:vertical;
-    }
-
-    .print{
-        margin-top:20px;
-        padding:12px 20px;
-        background:#0b6b2e;
-        color:white;
-        border:none;
-        cursor:pointer;
-        font-size:16px;
-    }
-
-    @media print{
-
-        .print{
-            display:none;
-        }
-
-        body{
-            padding:0;
-        }
-    }
-
-    </style>
-
-    </head>
-
-    <body>
-
-    <h1>
-        DECLARACIÓN INDIVIDUAL DE ACCIDENTE ESCOLAR
-    </h1>
-
-    <div class="section">
-
-        <div class="section-title">
-            INDIVIDUALIZACIÓN DEL ESTABLECIMIENTO
+            <label>TESTIGO 1</label>
+            <input>
         </div>
 
-        <div class="grid">
-
-            <div>
-                <label>Establecimiento</label>
-                <input value="ESCUELA ISABEL PEÑA MORALES">
-            </div>
-
-            <div>
-                <label>Comuna</label>
-                <input value="COPIAPÓ">
-            </div>
-
-            <div>
-                <label>Curso</label>
-                <input value="${safe(d["Curso"])}">
-            </div>
-
-            <div>
-                <label>Horario</label>
-                <input value="DIURNO">
-            </div>
-
+        <div class="field">
+            <label>RUN TESTIGO 1</label>
+            <input>
         </div>
 
     </div>
 
-    <div class="section">
 
-        <div class="section-title">
-            INDIVIDUALIZACIÓN DEL ACCIDENTADO
+    <div class="row">
+
+        <div class="field">
+            <label>TESTIGO 2</label>
+            <input>
         </div>
 
-        <div class="grid">
-
-            <div>
-                <label>Nombre Completo</label>
-                <input value="${safe(d["Estudiante"])}">
-            </div>
-
-            <div>
-                <label>RUN</label>
-                <input value="${safe(d["RUN / IPE"])}">
-            </div>
-
-            <div>
-                <label>Fecha Nacimiento</label>
-                <input value="${safe(d["Fecha Nacimiento"])}">
-            </div>
-
-            <div>
-                <label>Sexo</label>
-                <input value="${safe(d["Sexo"])}">
-            </div>
-
-            <div>
-                <label>Domicilio</label>
-                <input value="${safe(d["Domicilio"])}">
-            </div>
-
-            <div>
-                <label>Comuna</label>
-                <input value="${safe(d["Comuna"])}">
-            </div>
-
-            <div>
-                <label>Teléfono</label>
-                <input value="${safe(d["Teléfono"])}">
-            </div>
-
-            <div>
-                <label>Correo</label>
-                <input value="${safe(d["Correo Electrónico"])}">
-            </div>
-
+        <div class="field">
+            <label>RUN TESTIGO 2</label>
+            <input>
         </div>
 
     </div>
 
-    <div class="section">
 
-        <div class="section-title">
-            INFORME SOBRE EL ACCIDENTE
+    <div class="section-title">
+        CIRCUNSTANCIAS DEL ACCIDENTE
+    </div>
+
+    <textarea></textarea>
+
+
+    <div class="section-title">
+        APODERADO
+    </div>
+
+    <div class="row">
+
+        <div class="large field">
+            <label>NOMBRE APODERADO TITULAR</label>
+            <input value="${safe(d["Nombre Apoderado TITULAR"])}">
         </div>
 
-        <div class="grid-4">
-
-            <div>
-                <label>Hora</label>
-                <input value="${hora}">
-            </div>
-
-            <div>
-                <label>Minuto</label>
-                <input value="${minuto}">
-            </div>
-
-            <div>
-                <label>Fecha</label>
-                <input value="${fecha}">
-            </div>
-
-            <div>
-                <label>Día</label>
-                <input value="${diaSemana}">
-            </div>
-
+        <div class="medium field">
+            <label>RUT</label>
+            <input value="${safe(d["RUT  TITULAR"])}">
         </div>
 
-        <br>
-
-        <div class="grid">
-
-            <div>
-                <label>Tipo de Accidente</label>
-
-                <select>
-
-                    <option>
-                        En la Escuela
-                    </option>
-
-                    <option>
-                        Trayecto
-                    </option>
-
-                </select>
-            </div>
-
-            <div>
-                <label>Lugar del Accidente</label>
-                <input>
-            </div>
-
-        </div>
-
-        <br>
-
-        <div class="grid">
-
-            <div>
-                <label>Testigo 1</label>
-                <input>
-            </div>
-
-            <div>
-                <label>RUN Testigo 1</label>
-                <input>
-            </div>
-
-            <div>
-                <label>Testigo 2</label>
-                <input>
-            </div>
-
-            <div>
-                <label>RUN Testigo 2</label>
-                <input>
-            </div>
-
+        <div class="medium field">
+            <label>TELÉFONO</label>
+            <input value="${safe(d["Teléfono  TITULAR"])}">
         </div>
 
     </div>
 
-    <div class="section">
 
-        <div class="section-title">
-            CIRCUNSTANCIA DEL ACCIDENTE
-        </div>
-
-        <textarea
-        placeholder="Describa cómo ocurrió el accidente...">
-        </textarea>
-
-    </div>
-
-    <div class="section">
-
-        <div class="section-title">
-            APODERADO
-        </div>
-
-        <div class="grid">
-
-            <div>
-                <label>Nombre Apoderado Titular</label>
-
-                <input
-                value="${safe(d["Nombre Apoderado TITULAR"])}">
-            </div>
-
-            <div>
-                <label>Teléfono</label>
-
-                <input
-                value="${safe(d["Teléfono  TITULAR"])}">
-            </div>
-
-        </div>
-
-    </div>
-
-    <button
-    class="print"
-    onclick="window.print()">
-
+    <button class="print" onclick="window.print()">
         Imprimir / Guardar PDF
-
     </button>
+
+
+    </div>
 
     </body>
 
     </html>
+
     `);
 }
 

@@ -370,29 +370,7 @@ function verDetalle(i){
 
         "";
 
-    /* =========================================================
-   DÍA DE LA SEMANA AUTOMÁTICO
-========================================================= */
 
-const diaSemanaNumero = (() => {
-
-    const jsDay = ahora.getDay();
-
-    switch(jsDay){
-
-        case 1: return "1"; // lunes
-        case 2: return "2";
-        case 3: return "3";
-        case 4: return "4";
-        case 5: return "5";
-        case 6: return "6";
-        case 0: return "7"; // domingo
-    }
-
-    return "";
-})();
-
-    
     const w = window.open(
         "",
         "_blank",
@@ -587,6 +565,29 @@ function abrirReporte(i){
     const hora  = String(ahora.getHours()).padStart(2,'0');
     const mins  = String(ahora.getMinutes()).padStart(2,'0');
 
+/* =========================================================
+   DÍA DE LA SEMANA
+========================================================= */
+
+const diaSemanaNumero = (() => {
+
+    const jsDay = ahora.getDay();
+
+    switch(jsDay){
+
+        case 1: return "1";
+        case 2: return "2";
+        case 3: return "3";
+        case 4: return "4";
+        case 5: return "5";
+        case 6: return "6";
+        case 0: return "7";
+    }
+
+    return "";
+
+})();
+    
     /* Descomponer nombre del alumno en apellidos + nombres */
     /* Formato esperado en la planilla: "APELLIDO1 APELLIDO2, NOMBRES" o "NOMBRES APELLIDO1 APELLIDO2" */
     /* Intentamos separar por coma; si no hay coma dejamos todo en nombres */
@@ -691,7 +692,11 @@ else if(
 /* =========================================================
    DOMICILIO
 ========================================================= */
-
+const domicilioCompleto =
+    d["Domicilio"]
+    || d["Dirección"]
+    || "";
+    
 let calle = domicilioCompleto;
 let numeroDireccion = "";
 

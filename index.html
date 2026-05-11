@@ -370,6 +370,29 @@ function verDetalle(i){
 
         "";
 
+    /* =========================================================
+   DÍA DE LA SEMANA AUTOMÁTICO
+========================================================= */
+
+const diaSemanaNumero = (() => {
+
+    const jsDay = ahora.getDay();
+
+    switch(jsDay){
+
+        case 1: return "1"; // lunes
+        case 2: return "2";
+        case 3: return "3";
+        case 4: return "4";
+        case 5: return "5";
+        case 6: return "6";
+        case 0: return "7"; // domingo
+    }
+
+    return "";
+})();
+
+    
     const w = window.open(
         "",
         "_blank",
@@ -669,17 +692,16 @@ else if(
    DOMICILIO
 ========================================================= */
 
-let domicilioCompleto =
-    d["Domicilio"]
-    || d["Direccion"]
-    || d["Dirección"]
-    || "";
+let calle = domicilioCompleto;
+let numeroDireccion = "";
 
-/* quitar número */
-domicilioCompleto =
-    domicilioCompleto
-    .replace(/\d+/g,"")
-    .trim();
+const matchNumero = domicilioCompleto.match(/(.*?)(\d+.*)$/);
+
+if(matchNumero){
+
+    calle = matchNumero[1].trim();
+    numeroDireccion = matchNumero[2].trim();
+}
 
 /* =========================================================
    COMUNA
@@ -841,7 +863,7 @@ const runClean =
   }
 
   .page {
-    width: 960px;
+    width: 1000px;
     margin: 0 auto;
     background: white;
     border: 2px solid black;
@@ -861,14 +883,16 @@ const runClean =
     height: 72px;
   }
 
-  .enc-titulo {
+.enc-titulo {
     flex: 1;
     text-align: center;
-    font-size: 19px;
+    font-size: 16px;
     font-weight: bold;
-    letter-spacing: 3px;
-    padding-top: 8px;
-  }
+    letter-spacing: 2px;
+    padding-top: 10px;
+    line-height: 1.4;
+    word-break: break-word;
+}
 
   .enc-num {
     text-align: right;
@@ -927,12 +951,13 @@ const runClean =
     letter-spacing: 0.5px;
   }
 
-  .cell-val {
+.cell-val {
     font-size: 11px;
     border-bottom: 1px solid #555;
     min-height: 15px;
     padding-bottom: 1px;
-  }
+    outline: none;
+}
 
   /* ---- ACCIDENTE ---- */
   .acc-grid {
@@ -1038,9 +1063,10 @@ const runClean =
 
     <img src="gob.png" alt="Ministerio de Educación">
 
-    <div class="enc-titulo">
-      D E C L A R A C I O N &nbsp; I N D I V I D U A L &nbsp; D E &nbsp; A C C I D E N T E &nbsp; E S C O L A R
-    </div>
+  <div class="enc-titulo">
+  D E C L A R A C I Ó N &nbsp; I N D I V I D U A L<br>
+  D E &nbsp; A C C I D E N T E &nbsp; E S C O L A R
+</div>
 
     <div class="enc-num">
       <table>
@@ -1156,12 +1182,12 @@ const runClean =
 
     <div class="cell" style="flex:2;">
       <span class="cell-label">CALLE</span>
-      <span class="cell-val" contenteditable="true">${safe(domicilioCompleto)}</span>
+      <span class="cell-val" contenteditable="true">${safe(calle)}</span>
     </div>
 
     <div class="cell" style="flex:0.6;">
-      <span class="cell-label">Nº</span>
-      <span class="cell-val" contenteditable="true">&nbsp;</span>
+        <span class="cell-label">N°</span>
+        <span class="cell-val" contenteditable="true">${safe(numeroDireccion)}</span>
     </div>
 
     <div class="cell" style="flex:1.2;">
@@ -1240,11 +1266,18 @@ const runClean =
 
     <div class="dias-col">
       <div style="font-weight:bold;margin-bottom:5px;">DIA ACCIDENTE</div>
-      ${box("","28px")}
+      ${box(diaSemanaNumero,"28px")}
       <div style="margin-top:8px;">
         <div style="font-weight:bold;font-size:9px;">ACCIDENTE</div>
-        <div style="margin-top:4px;">DE TRAYECTO .= 1 &nbsp;${box("","22px")}</div>
-        <div style="margin-top:4px;">EN LA ESCUELA &nbsp;&nbsp; 2 &nbsp;${box("","22px")}</div>
+        <div style="margin-top:4px;">
+  DE TRAYECTO = 1
+  <span contenteditable="true">${box("","22px")}</span>
+</div>
+
+<div style="margin-top:4px;">
+  EN LA ESCUELA = 2
+  <span contenteditable="true">${box("","22px")}</span>
+</div>
       </div>
     </div>
 
@@ -1277,7 +1310,7 @@ const runClean =
   </div>
 
   <!-- FIRMA RECTOR -->
-  <div style="text-align:right;padding-right:60px;margin-top:18px;margin-bottom:18px;">
+ <div style="text-align:right;padding-right:60px;margin-top:45px;margin-bottom:35px;">
     <div style="display:inline-block;text-align:center;">
       <div style="border-top:1px solid black;width:220px;margin-bottom:3px;"></div>
       <div style="font-size:9px;font-weight:bold;">FIRMA Y TIMBRE<br>RECTOR O REPRESENTANTE</div>
@@ -1285,7 +1318,8 @@ const runClean =
   </div>
 
   <!-- ===== NATURALEZA Y CONSECUENCIA ===== -->
-  <div class="sec-title">N A T U R A L E Z A &nbsp; Y &nbsp; C O N S E C U E N C I A &nbsp; D E L &nbsp; A C C I D E N T E
+  <div class="sec-title" style="margin-top:35px;">
+  N A T U R A L E Z A &nbsp; Y &nbsp; C O N S E C U E N C I A &nbsp; D E L &nbsp; A C C I D E N T E
     <span style="float:right;font-size:9px;font-weight:normal;">
       S &nbsp; S &nbsp;&nbsp; ESTABLECIMIENTO &nbsp;&nbsp; CÓDIGO ___
     </span>

@@ -1052,6 +1052,19 @@ const runClean =
     letter-spacing: 1px;
   }
 
+/* CAMPOS EDITABLES */
+[contenteditable="true"]{
+    cursor:text;
+}
+
+[contenteditable="true"]:hover{
+    background:#fffbe6;
+}
+
+[contenteditable="true"]:focus{
+    background:#fff3c4;
+}
+
   @media print {
     body { background: white; padding: 0; }
     .page { border: none; }
@@ -1118,7 +1131,9 @@ const runClean =
     <div class="cell" style="flex:1.5;flex-direction:row;align-items:flex-end;gap:6px;">
       <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
         <span class="cell-label">CURSO</span>
-        <span class="cell-val">${safe(d["Curso"])}</span>
+        <span class="cell-val" contenteditable="true">
+    ${safe(d["Curso"])}
+</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:2px;">
         <span class="cell-label">HORARIO</span>
@@ -1128,12 +1143,11 @@ const runClean =
 
     <div class="cell" style="flex:1.8;">
       <span class="cell-label">FECHA REGISTRO DE LOS DATOS</span>
-      <div style="display:flex;gap:2px;margin-top:3px;">
-        ${boxes(dia,2)}
-        ${boxes(mes,2)}
-        ${boxes("20"+anio,4)}
-      </div>
-    </div>
+   <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(dia,2)}
+    ${boxes(mes,2)}
+    ${boxes("20"+anio,4)}
+</div>
 
   </div>
 
@@ -1159,8 +1173,9 @@ const runClean =
 
     <div class="cell" style="flex:0.7;align-items:center;">
       <span class="cell-label">SEXO &nbsp; F=2 &nbsp; M=1</span>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(sexoCod,1)}</div>
-    </div>
+      <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(sexoCod,1)}
+</div>
 
     <div class="cell" style="flex:1.2;">
       <span class="cell-label">FECHA NACIMIENTO</span>
@@ -1173,8 +1188,9 @@ const runClean =
 
     <div class="cell" style="flex:0.5;">
       <span class="cell-label">EDAD</span>
-      <div style="margin-top:3px;">${boxes(edad,2)}</div>
-    </div>
+      <div contenteditable="true" style="margin-top:3px;">
+    ${boxes(edad,2)}
+</div>
 
   </div>
 
@@ -1226,28 +1242,33 @@ const runClean =
 
     <div class="acc-cell">
       <div class="cell-label">HORA</div>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(hora,2)}</div>
-    </div>
+      <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(hora,2)}
+</div>
 
     <div class="acc-cell">
       <div class="cell-label">MINUTOS</div>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(mins,2)}</div>
-    </div>
+      <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(mins,2)}
+</div>
 
     <div class="acc-cell">
       <div class="cell-label">AÑO</div>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes("20"+anio,2)}</div>
-    </div>
+     <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes("20"+anio,4)}
+</div>
 
     <div class="acc-cell">
       <div class="cell-label">MES</div>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(mes,2)}</div>
-    </div>
+     <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(mes,2)}
+</div>
 
     <div class="acc-cell">
       <div class="cell-label">DIA</div>
-      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(dia,2)}</div>
-    </div>
+      <div contenteditable="true" style="display:flex;gap:2px;margin-top:3px;">
+    ${boxes(dia,2)}
+</div>
 
     <div class="acc-cell" style="border-right:none;">
       <div class="cell-label">TESTIGOS: (EN CASO DE TRAYECTO)</div>
@@ -1271,7 +1292,9 @@ const runClean =
 
     <div class="dias-col">
       <div style="font-weight:bold;margin-bottom:5px;">DIA ACCIDENTE</div>
-      ${box(diaSemanaNumero,"28px")}
+      <span contenteditable="true">
+    ${box(diaSemanaNumero,"28px")}
+</span>
       <div style="margin-top:8px;">
         <div style="font-weight:bold;font-size:9px;">ACCIDENTE</div>
         <div style="margin-top:4px;">

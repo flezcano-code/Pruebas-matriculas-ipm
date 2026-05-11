@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -549,358 +548,692 @@ function loginReporte(i){
     abrirReporte(i);
 }
 
-/* REPORTE */
+/* ============================================================
+   REPORTE — Declaración Individual de Accidente Escolar (DIAE)
+   Réplica fiel del formulario oficial del Ministerio de Educación
+   ============================================================ */
 function abrirReporte(i){
 
     const d = data[i];
 
     const ahora = new Date();
 
-    const fecha =
-        String(ahora.getDate()).padStart(2,'0') + "/" +
-        String(ahora.getMonth()+1).padStart(2,'0') + "/" +
-        ahora.getFullYear();
+    const anio  = String(ahora.getFullYear()).slice(-2); // "26"
+    const mes   = String(ahora.getMonth()+1).padStart(2,'0');
+    const dia   = String(ahora.getDate()).padStart(2,'0');
+    const hora  = String(ahora.getHours()).padStart(2,'0');
+    const mins  = String(ahora.getMinutes()).padStart(2,'0');
 
-    const hora =
-        String(ahora.getHours()).padStart(2,'0');
+    /* Descomponer nombre del alumno en apellidos + nombres */
+    /* Formato esperado en la planilla: "APELLIDO1 APELLIDO2, NOMBRES" o "NOMBRES APELLIDO1 APELLIDO2" */
+    /* Intentamos separar por coma; si no hay coma dejamos todo en nombres */
+    const estudianteRaw = safe(d["Estudiante"]) || "";
+    let apPaterno = "", apMaterno = "", nombres = "";
 
-    const minutos =
-        String(ahora.getMinutes()).padStart(2,'0');
-
-    const w = window.open(
-        "",
-        "_blank",
-        "width=1400,height=1000"
-    );
-
-    w.document.write(`
-    <html>
-    <head>
-
-    <title>Declaración Accidente Escolar</title>
-
-    <style>
-
-    body{
-        font-family:Arial;
-        background:white;
-        margin:0;
-        padding:20px;
+    if(estudianteRaw.includes(",")){
+        const partes = estudianteRaw.split(",");
+        const apellidos = partes[0].trim().split(" ");
+        apPaterno = apellidos[0] || "";
+        apMaterno = apellidos.slice(1).join(" ") || "";
+        nombres   = partes[1].trim();
+    } else {
+        /* Sin coma: asumir "NOMBRE(S) APELLIDO1 APELLIDO2" no es posible distinguir,
+           ponemos todo en nombres y dejamos apellidos en blanco para edición manual */
+        nombres = estudianteRaw;
     }
 
-    .page{
-        width:1100px;
-        margin:auto;
-        border:2px solid black;
-        padding:15px;
-    }
-
-    .top{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        margin-bottom:10px;
-    }
-
-    .logo{
-        height:90px;
-    }
-
-    .titulo{
-        text-align:center;
-        font-size:28px;
-        letter-spacing:4px;
-        font-weight:bold;
-        flex:1;
-    }
-
-    table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:5px;
-        font-size:12px;
-    }
-
-    td{
-        border:1px solid black;
-        padding:5px;
-        vertical-align:top;
-    }
-
-    .section{
-        background:#e5e5e5;
-        font-weight:bold;
-        text-align:center;
-    }
-
-    input, textarea{
-        width:100%;
-        border:none;
-        outline:none;
-        font-size:12px;
-        font-family:Arial;
-    }
-
-    textarea{
-        height:120px;
-        resize:none;
-    }
-
-    .firma{
-        margin-top:40px;
-        text-align:right;
-        padding-right:40px;
-    }
-
-    .print{
-        margin-top:20px;
-        padding:10px 15px;
-        background:#0b6b2e;
-        color:white;
-        border:none;
-        cursor:pointer;
-        font-size:15px;
-    }
-
-    @media print{
-
-        .print{
-            display:none;
+    /* Calcular edad a partir de Fecha Nacimiento */
+    let edad = "";
+    const fnRaw = d["Fecha Nacimiento"] || "";
+    if(fnRaw){
+        /* soporta dd/mm/aaaa o aaaa-mm-dd */
+        let fn;
+        if(fnRaw.includes("/")){
+            const p = fnRaw.split("/");
+            fn = new Date(p[2], p[1]-1, p[0]);
+        } else {
+            fn = new Date(fnRaw);
         }
-
-        body{
-            padding:0;
-        }
-
-        .page{
-            border:none;
+        if(!isNaN(fn)){
+            let e = ahora.getFullYear() - fn.getFullYear();
+            const m = ahora.getMonth() - fn.getMonth();
+            if(m < 0 || (m===0 && ahora.getDate() < fn.getDate())) e--;
+            edad = e;
         }
     }
 
-    </style>
+    /* Fecha nacimiento formateada para casillas individuales */
+    let fnDia="", fnMes="", fnAnioFull="";
+    if(fnRaw.includes("/")){
+        const p = fnRaw.split("/");
+        fnDia  = p[0] || "";
+        fnMes  = p[1] || "";
+        fnAnioFull = p[2] || "";
+    }
 
-    </head>
+    /* RUN separado del dígito verificador */
+    const runRaw = safe(d["RUN / IPE"]) || "";
+    /* quitar puntos */
+    const runClean = runRaw.replace(/\./g,"");
 
-    <body>
+    /* Sexo → código 1(M) / 2(F) */
+    const sexoRaw = (d["Sexo"] || "").toUpperCase();
+    const sexoCod = sexoRaw.startsWith("F") ? "2" : sexoRaw.startsWith("M") ? "1" : "";
 
-    <div class="page">
+    /* Helper: crea una casilla tipo cuadrado con un carácter */
+    function box(val, w){
+        w = w || "22px";
+        return `<span style="
+            display:inline-block;
+            width:${w};
+            height:22px;
+            border:1px solid black;
+            text-align:center;
+            font-size:11px;
+            line-height:22px;
+            font-family:Arial;
+            vertical-align:middle;
+        ">${val||""}</span>`;
+    }
 
-        <div class="top">
+    /* Helper: casillas para cada carácter de un string */
+    function boxes(str, n){
+        const s = (str||"").toString().toUpperCase();
+        let out = "";
+        for(let i=0; i<n; i++){
+            out += box(s[i]||"");
+        }
+        return out;
+    }
 
-            <img src="gob.png" class="logo">
+    /* Helper: campo de texto editable con línea inferior */
+    function field(val, flex){
+        flex = flex||"1";
+        return `<span style="
+            flex:${flex};
+            border-bottom:1px solid black;
+            font-size:11px;
+            padding:0 2px;
+            min-width:40px;
+            display:inline-block;
+        ">${safe(val)||"&nbsp;"}</span>`;
+    }
 
-            <div class="titulo">
-                DECLARACIÓN INDIVIDUAL DE ACCIDENTE ESCOLAR
-            </div>
+    /* Helper: fila de etiqueta + valor con línea */
+    function labelVal(label, val){
+        return `
+        <div style="display:flex;flex-direction:column;gap:1px;">
+            <span style="font-size:9px;font-weight:bold;">${label}</span>
+            <span style="font-size:11px;border-bottom:1px solid black;min-height:16px;padding-bottom:1px;">${safe(val)||"&nbsp;"}</span>
+        </div>`;
+    }
 
-        </div>
+    const w = window.open("","_blank","width=1100,height=980");
 
-        <table>
+    w.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DIAE — ${estudianteRaw}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
 
-            <tr>
-                <td colspan="6" class="section">
-                    INDIVIDUALIZACIÓN DEL ESTABLECIMIENTO
-                </td>
-            </tr>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    padding: 20px;
+  }
 
-            <tr>
-                <td colspan="3">
-                    NOMBRE ESTABLECIMIENTO<br>
-                    <input value="ESCUELA ISABEL PEÑA MORALES">
-                </td>
+  .page {
+    width: 960px;
+    margin: 0 auto;
+    background: white;
+    border: 2px solid black;
+    padding: 14px 18px;
+    font-size: 11px;
+  }
 
-                <td>
-                    CIUDAD<br>
-                    <input value="COPIAPÓ">
-                </td>
+  /* ---- ENCABEZADO ---- */
+  .enc {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
 
-                <td>
-                    COMUNA<br>
-                    <input value="COPIAPÓ">
-                </td>
+  .enc img {
+    height: 72px;
+  }
 
-                <td>
-                    CURSO<br>
-                    <input value="${safe(d["Curso"])}">
-                </td>
-            </tr>
+  .enc-titulo {
+    flex: 1;
+    text-align: center;
+    font-size: 19px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    padding-top: 8px;
+  }
 
-            <tr>
-                <td colspan="6" class="section">
-                    INDIVIDUALIZACIÓN DEL ACCIDENTADO
-                </td>
-            </tr>
+  .enc-num {
+    text-align: right;
+    font-size: 10px;
+    min-width: 140px;
+  }
 
-            <tr>
+  .enc-num table {
+    border-collapse: collapse;
+    margin-left: auto;
+    font-size: 10px;
+  }
 
-                <td colspan="2">
-                    APELLIDOS Y NOMBRES<br>
-                    <input value="${safe(d["Estudiante"])}">
-                </td>
+  .enc-num table td, .enc-num table th {
+    border: 1px solid black;
+    padding: 2px 5px;
+  }
 
-                <td>
-                    RUN<br>
-                    <input value="${safe(d["RUN / IPE"])}">
-                </td>
+  /* ---- SECCIONES ---- */
+  .sec-title {
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border-bottom: 1px solid black;
+    padding: 3px 0;
+    margin: 8px 0 5px 0;
+  }
 
-                <td>
-                    SEXO<br>
-                    <input value="${safe(d["Sexo"])}">
-                </td>
+  /* ---- GRILLAS ---- */
+  .row {
+    display: flex;
+    gap: 0;
+    border: 1px solid black;
+    border-bottom: none;
+  }
 
-                <td>
-                    FECHA NACIMIENTO<br>
-                    <input value="${safe(d["Fecha Nacimiento"])}">
-                </td>
+  .row:last-of-type {
+    border-bottom: 1px solid black;
+  }
 
-                <td>
-                    TELÉFONO<br>
-                    <input value="${safe(d["Teléfono"])}">
-                </td>
+  .cell {
+    border-right: 1px solid black;
+    padding: 4px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
 
-            </tr>
+  .cell:last-child {
+    border-right: none;
+  }
 
-            <tr>
+  .cell-label {
+    font-size: 8px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
 
-                <td colspan="4">
-                    DOMICILIO<br>
-                    <input value="${safe(d["Domicilio"])}">
-                </td>
+  .cell-val {
+    font-size: 11px;
+    border-bottom: 1px solid #555;
+    min-height: 15px;
+    padding-bottom: 1px;
+  }
 
-                <td colspan="2">
-                    COMUNA<br>
-                    <input value="${safe(d["Comuna"])}">
-                </td>
+  /* ---- ACCIDENTE ---- */
+  .acc-grid {
+    display: grid;
+    grid-template-columns: 80px 80px 60px 60px 60px 1fr;
+    border: 1px solid black;
+    border-bottom: none;
+  }
 
-            </tr>
+  .acc-cell {
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    padding: 4px 5px;
+  }
 
-            <tr>
-                <td colspan="6" class="section">
-                    INFORME SOBRE EL ACCIDENTE
-                </td>
-            </tr>
+  .acc-cell:last-child { border-right: none; }
 
-            <tr>
+  /* ---- DIAS ---- */
+  .dias-grid {
+    display: grid;
+    grid-template-columns: 90px 80px 80px 1fr;
+    border: 1px solid black;
+    border-top: none;
+  }
 
-                <td>
-                    HORA<br>
-                    <input value="${hora}">
-                </td>
+  .dias-col {
+    border-right: 1px solid black;
+    padding: 4px 5px;
+    font-size: 10px;
+  }
 
-                <td>
-                    MINUTOS<br>
-                    <input value="${minutos}">
-                </td>
+  .dias-col:last-child { border-right: none; }
 
-                <td>
-                    FECHA<br>
-                    <input value="${fecha}">
-                </td>
+  /* ---- CIRCUNSTANCIA ---- */
+  .circ {
+    border: 1px solid black;
+    border-top: none;
+    padding: 5px;
+    min-height: 80px;
+  }
 
-                <td colspan="3">
-                    LUGAR DEL ACCIDENTE<br>
-                    <input>
-                </td>
+  /* ---- NATURALEZA ---- */
+  .nat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid black;
+    border-top: none;
+  }
 
-            </tr>
+  .nat-col {
+    border-right: 1px solid black;
+    padding: 5px;
+    font-size: 10px;
+  }
 
-            <tr>
+  .nat-col:last-child { border-right: none; }
 
-                <td colspan="3">
-                    TESTIGO 1<br>
-                    <input>
-                </td>
+  /* ---- FIRMAS ---- */
+  .firmas {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding: 0 40px;
+  }
 
-                <td colspan="3">
-                    TESTIGO 2<br>
-                    <input>
-                </td>
+  .firma-box {
+    text-align: center;
+    font-size: 10px;
+  }
 
-            </tr>
+  .firma-line {
+    border-top: 1px solid black;
+    width: 200px;
+    margin: 0 auto 4px auto;
+  }
 
-            <tr>
+  /* ---- PRINT ---- */
+  .btn-print {
+    margin: 18px auto 0 auto;
+    display: block;
+    padding: 10px 22px;
+    background: #0b6b2e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
 
-                <td colspan="6">
-                    CIRCUNSTANCIA DEL ACCIDENTE<br>
+  @media print {
+    body { background: white; padding: 0; }
+    .page { border: none; }
+    .btn-print { display: none; }
+  }
+</style>
+</head>
+<body>
 
-                    <textarea></textarea>
+<div class="page">
 
-                </td>
+  <!-- ===== ENCABEZADO ===== -->
+  <div class="enc">
 
-            </tr>
+    <img src="gob.png" alt="Ministerio de Educación">
 
-            <tr>
-                <td colspan="6" class="section">
-                    APODERADO
-                </td>
-            </tr>
+    <div class="enc-titulo">
+      D E C L A R A C I O N &nbsp; I N D I V I D U A L &nbsp; D E &nbsp; A C C I D E N T E &nbsp; E S C O L A R
+    </div>
 
-            <tr>
+    <div class="enc-num">
+      <table>
+        <tr>
+          <td colspan="2" style="text-align:center;font-weight:bold;">Nº &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+          <td>FISCAL O MUNICIPAL = 1</td>
+          <td style="text-align:center;">1</td>
+        </tr>
+        <tr>
+          <td>PARTICULAR = 2</td>
+          <td></td>
+        </tr>
+      </table>
+      <div style="margin-top:6px;font-size:9px;font-weight:bold;">R. B. DATOS</div>
+      <div style="display:flex;gap:2px;margin-top:2px;">
+        ${boxes("4189",4)}
+      </div>
+    </div>
 
-                <td colspan="2">
-                    APODERADO TITULAR<br>
-                    <input value="${safe(d["Nombre Apoderado TITULAR"])}">
-                </td>
+  </div>
 
-                <td>
-                    RUT<br>
-                    <input value="${safe(d["RUT  TITULAR"])}">
-                </td>
+  <!-- ===== ESTABLECIMIENTO ===== -->
+  <div class="sec-title">I N D I V I D U A L I Z A C I Ó N &nbsp; D E L &nbsp; E S T A B L E C I M I E N T O</div>
 
-                <td>
-                    TELÉFONO<br>
-                    <input value="${safe(d["Teléfono  TITULAR"])}">
-                </td>
+  <div class="row" style="border-bottom:1px solid black;">
 
-                <td colspan="2">
-                    EMAIL<br>
-                    <input value="${safe(d["Correo Electrónico  TITULAR"])}">
-                </td>
+    <div class="cell" style="flex:3;">
+      <span class="cell-label">NOMBRE ESTABLECIMIENTO</span>
+      <span class="cell-val">ESCUELA "ISABEL PEÑA MORALES"</span>
+    </div>
 
-            </tr>
+    <div class="cell" style="flex:1.2;">
+      <span class="cell-label">CIUDAD</span>
+      <span class="cell-val">COPIAPÓ</span>
+    </div>
 
-            <tr>
+    <div class="cell" style="flex:1.2;">
+      <span class="cell-label">COMUNA</span>
+      <span class="cell-val">COPIAPÓ</span>
+    </div>
 
-                <td colspan="2">
-                    APODERADO SUPLENTE<br>
-                    <input value="${safe(d["Nombre Apoderado SUPLENTE"])}">
-                </td>
+    <div class="cell" style="flex:1.5;flex-direction:row;align-items:flex-end;gap:6px;">
+      <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+        <span class="cell-label">CURSO</span>
+        <span class="cell-val">${safe(d["Curso"])}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span class="cell-label">HORARIO</span>
+        <span class="cell-val">Diurno</span>
+      </div>
+    </div>
 
-                <td>
-                    RUT<br>
-                    <input value="${safe(d["RUT SUPLENTE"])}">
-                </td>
+    <div class="cell" style="flex:1.8;">
+      <span class="cell-label">FECHA REGISTRO DE LOS DATOS</span>
+      <div style="display:flex;gap:2px;margin-top:3px;">
+        ${boxes(dia,2)}
+        ${boxes(mes,2)}
+        ${boxes("20"+anio,4)}
+      </div>
+    </div>
 
-                <td>
-                    TELÉFONO<br>
-                    <input value="${safe(d["Teléfono SUPLENTE"])}">
-                </td>
+  </div>
 
-                <td colspan="2">
-                    EMAIL<br>
-                    <input value="${safe(d["Correo Electrónico SUPLENTE"])}">
-                </td>
+  <!-- ===== ACCIDENTADO ===== -->
+  <div class="sec-title">I N D I V I D U A L I Z A C I O N &nbsp; D E L &nbsp; A C C I D E N T A D O</div>
 
-            </tr>
+  <div class="row">
 
-        </table>
+    <div class="cell" style="flex:1.5;">
+      <span class="cell-label">APELLIDO PATERNO</span>
+      <span class="cell-val" contenteditable="true">${apPaterno}</span>
+    </div>
 
-        <div class="firma">
+    <div class="cell" style="flex:1.5;">
+      <span class="cell-label">APELLIDO MATERNO</span>
+      <span class="cell-val" contenteditable="true">${apMaterno}</span>
+    </div>
 
-            ___________________________<br>
-            FIRMA Y TIMBRE
+    <div class="cell" style="flex:2;">
+      <span class="cell-label">NOMBRES</span>
+      <span class="cell-val" contenteditable="true">${nombres}</span>
+    </div>
 
-        </div>
+    <div class="cell" style="flex:0.7;align-items:center;">
+      <span class="cell-label">SEXO &nbsp; F=2 &nbsp; M=1</span>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(sexoCod,1)}</div>
+    </div>
 
-        <button class="print" onclick="window.print()">
-            Imprimir / Guardar PDF
-        </button>
+    <div class="cell" style="flex:1.2;">
+      <span class="cell-label">FECHA NACIMIENTO</span>
+      <div style="display:flex;gap:2px;margin-top:3px;">
+        ${boxes(fnDia,2)}
+        ${boxes(fnMes,2)}
+        ${boxes(fnAnioFull,4)}
+      </div>
+    </div>
+
+    <div class="cell" style="flex:0.5;">
+      <span class="cell-label">EDAD</span>
+      <div style="margin-top:3px;">${boxes(edad,2)}</div>
+    </div>
+
+  </div>
+
+  <div class="row" style="border-bottom:1px solid black;">
+
+    <div class="cell" style="flex:1;">
+      <span class="cell-label">R. U. N.</span>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(runClean,9)}</div>
+    </div>
+
+    <div class="cell" style="flex:2;">
+      <span class="cell-label">CALLE</span>
+      <span class="cell-val" contenteditable="true">${safe(d["Domicilio"])}</span>
+    </div>
+
+    <div class="cell" style="flex:0.6;">
+      <span class="cell-label">Nº</span>
+      <span class="cell-val" contenteditable="true">&nbsp;</span>
+    </div>
+
+    <div class="cell" style="flex:1.2;">
+      <span class="cell-label">POBLACIÓN O VILLA</span>
+      <span class="cell-val" contenteditable="true">&nbsp;</span>
+    </div>
+
+    <div class="cell" style="flex:1.2;">
+      <span class="cell-label">COMUNA</span>
+      <span class="cell-val">${safe(d["Comuna"])}</span>
+    </div>
+
+    <div class="cell" style="flex:1;">
+      <span class="cell-label">CIUDAD</span>
+      <span class="cell-val">Copiapó</span>
+    </div>
+
+    <div class="cell" style="flex:0.7;">
+      <span class="cell-label">CODIF.COM.</span>
+      <span class="cell-val">&nbsp;</span>
+    </div>
+
+  </div>
+
+  <!-- ===== INFORME ACCIDENTE ===== -->
+  <div class="sec-title">I N F O R M E &nbsp; S O B R E &nbsp; E L &nbsp; A C C I D E N T E
+    <span style="font-size:9px;font-weight:normal;margin-left:20px;">( FECHA, HORA Y DIA de la SEMANA EN QUE SE ACCIDENTÓ )</span>
+  </div>
+
+  <div class="acc-grid">
+
+    <div class="acc-cell">
+      <div class="cell-label">HORA</div>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(hora,2)}</div>
+    </div>
+
+    <div class="acc-cell">
+      <div class="cell-label">MINUTOS</div>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(mins,2)}</div>
+    </div>
+
+    <div class="acc-cell">
+      <div class="cell-label">AÑO</div>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes("20"+anio,2)}</div>
+    </div>
+
+    <div class="acc-cell">
+      <div class="cell-label">MES</div>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(mes,2)}</div>
+    </div>
+
+    <div class="acc-cell">
+      <div class="cell-label">DIA</div>
+      <div style="display:flex;gap:2px;margin-top:3px;">${boxes(dia,2)}</div>
+    </div>
+
+    <div class="acc-cell" style="border-right:none;">
+      <div class="cell-label">TESTIGOS: (EN CASO DE TRAYECTO)</div>
+    </div>
+
+  </div>
+
+  <div class="dias-grid">
+
+    <div class="dias-col" style="font-size:9px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td>LUNES</td><td style="border:1px solid black;width:16px;text-align:center;">1</td></tr>
+        <tr><td>MARTES</td><td style="border:1px solid black;width:16px;text-align:center;">2</td></tr>
+        <tr><td>MIERCOLES</td><td style="border:1px solid black;width:16px;text-align:center;">3</td></tr>
+        <tr><td>JUEVES</td><td style="border:1px solid black;width:16px;text-align:center;">4</td></tr>
+        <tr><td>VIERNES</td><td style="border:1px solid black;width:16px;text-align:center;">5</td></tr>
+        <tr><td>SABADO</td><td style="border:1px solid black;width:16px;text-align:center;">6</td></tr>
+        <tr><td>DOMINGO</td><td style="border:1px solid black;width:16px;text-align:center;">7</td></tr>
+      </table>
+    </div>
+
+    <div class="dias-col">
+      <div style="font-weight:bold;margin-bottom:5px;">DIA ACCIDENTE</div>
+      ${box("","28px")}
+      <div style="margin-top:8px;">
+        <div style="font-weight:bold;font-size:9px;">ACCIDENTE</div>
+        <div style="margin-top:4px;">DE TRAYECTO .= 1 &nbsp;${box("","22px")}</div>
+        <div style="margin-top:4px;">EN LA ESCUELA &nbsp;&nbsp; 2 &nbsp;${box("","22px")}</div>
+      </div>
+    </div>
+
+    <div class="dias-col" style="border-right:none;grid-column:3/5;">
+      <div style="font-size:9px;font-weight:bold;margin-bottom:4px;">a) TESTIGO 1</div>
+      <div style="display:flex;gap:6px;align-items:flex-end;">
+        <div style="flex:2;border-bottom:1px solid black;min-height:14px;" contenteditable="true">&nbsp;</div>
+        <div style="font-size:8px;">NOMBRE - APELLIDO</div>
+        <div style="font-size:8px;">C. NAC. DE ID.</div>
+        <div style="border-bottom:1px solid black;width:60px;min-height:14px;" contenteditable="true">&nbsp;</div>
+      </div>
+      <div style="margin-top:10px;font-size:9px;font-weight:bold;">b) TESTIGO 2</div>
+      <div style="display:flex;gap:6px;align-items:flex-end;margin-top:4px;">
+        <div style="flex:2;border-bottom:1px solid black;min-height:14px;" contenteditable="true">&nbsp;</div>
+        <div style="font-size:8px;">NOMBRE - APELLIDO</div>
+        <div style="font-size:8px;">C. NAC. DE ID.</div>
+        <div style="border-bottom:1px solid black;width:60px;min-height:14px;" contenteditable="true">&nbsp;</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CIRCUNSTANCIA -->
+  <div style="border:1px solid black;border-top:none;padding:5px;">
+    <div style="font-weight:bold;font-size:11px;letter-spacing:1px;margin-bottom:4px;">
+      C I R C U N S T A N C I A &nbsp; D E L &nbsp; A C C I D E N T E
+      <span style="font-size:9px;font-weight:normal;margin-left:10px;">(DESCRIBA COMO OCURRIÓ - CAUSAL)</span>
+    </div>
+    <div contenteditable="true" style="min-height:70px;border:none;font-size:11px;outline:none;">&nbsp;</div>
+  </div>
+
+  <!-- FIRMA RECTOR -->
+  <div style="text-align:right;padding-right:60px;margin-top:18px;margin-bottom:18px;">
+    <div style="display:inline-block;text-align:center;">
+      <div style="border-top:1px solid black;width:220px;margin-bottom:3px;"></div>
+      <div style="font-size:9px;font-weight:bold;">FIRMA Y TIMBRE<br>RECTOR O REPRESENTANTE</div>
+    </div>
+  </div>
+
+  <!-- ===== NATURALEZA Y CONSECUENCIA ===== -->
+  <div class="sec-title">N A T U R A L E Z A &nbsp; Y &nbsp; C O N S E C U E N C I A &nbsp; D E L &nbsp; A C C I D E N T E
+    <span style="float:right;font-size:9px;font-weight:normal;">
+      S &nbsp; S &nbsp;&nbsp; ESTABLECIMIENTO &nbsp;&nbsp; CÓDIGO ___
+    </span>
+  </div>
+
+  <div style="border:1px solid black;padding:6px;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+      <div>
+        <div style="font-size:9px;font-weight:bold;margin-bottom:3px;">ESTABLECIMIENTO ASISTENCIAL</div>
+        <div style="border-bottom:1px solid black;min-height:16px;" contenteditable="true">&nbsp;</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:bold;margin-bottom:3px;">DIAGNÓSTICO MÉDICO</div>
+        <div style="border-bottom:1px solid black;min-height:16px;" contenteditable="true">&nbsp;</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px;font-size:10px;">
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">PARTE DEL CUERPO AFECTADA</div>
+        <div style="border-bottom:1px solid black;min-height:16px;" contenteditable="true">&nbsp;</div>
+      </div>
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">HOSPITALIZACIÓN</div>
+        <div>SI ${box("","18px")} 1</div>
+        <div style="margin-top:3px;">NO ${box("","18px")} 2</div>
+      </div>
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">TOTAL DÍAS HOSP.</div>
+        <div style="display:flex;gap:2px;">${boxes("",3)}</div>
+      </div>
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">INCAPACIDAD</div>
+        <div>SI ${box("","18px")} 1</div>
+        <div style="margin-top:3px;">NO ${box("","18px")} 2</div>
+      </div>
 
     </div>
 
-    </body>
-    </html>
-    `);
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:10px;">
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">TIPO DE INCAPACIDAD</div>
+        <div>LEVE ${box("","18px")} 1</div>
+        <div style="margin-top:2px;">TEMPORAL ${box("","18px")} 2</div>
+        <div style="margin-top:2px;">INVALIDEZ PARCIAL ${box("","18px")} 3</div>
+        <div style="margin-top:2px;">INVALIDEZ TOTAL ${box("","18px")} 4</div>
+        <div style="margin-top:2px;">GRAN INVALIDEZ ${box("","18px")} 5</div>
+        <div style="margin-top:2px;">MUERTE ${box("","18px")} 6</div>
+      </div>
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">CAUSA DEL CIERRE DEL CASO</div>
+        <div>ALTA MÉDICA ${box("","18px")} 1</div>
+        <div style="margin-top:2px;">INVALIDEZ ${box("","18px")} 2</div>
+        <div style="margin-top:2px;">ABANDONO DE TRATAMIENTO ${box("","18px")} 3</div>
+        <div style="margin-top:2px;">MUERTE ${box("","18px")} 4</div>
+      </div>
+
+      <div>
+        <div style="font-weight:bold;margin-bottom:3px;">FECHA CIERRE DEL CASO</div>
+        <div style="display:flex;gap:4px;margin-top:4px;font-size:9px;">
+          <div>
+            <div>AÑO</div>
+            <div style="display:flex;gap:1px;">${boxes("",4)}</div>
+          </div>
+          <div>
+            <div>MES</div>
+            <div style="display:flex;gap:1px;">${boxes("",2)}</div>
+          </div>
+          <div>
+            <div>DÍA</div>
+            <div style="display:flex;gap:1px;">${boxes("",2)}</div>
+          </div>
+        </div>
+        <div style="margin-top:20px;text-align:right;font-size:9px;font-weight:bold;">FIRMA DEL ESTADÍSTICO</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TOTAL DÍAS INCAPACIDAD (segunda línea) -->
+  <div style="border:1px solid black;border-top:none;padding:5px;font-size:10px;">
+    <span style="font-weight:bold;">TOTAL DÍAS INCAPACIDAD:</span>
+    <span style="display:inline-flex;gap:2px;margin-left:8px;">${boxes("",4)}</span>
+  </div>
+
+  <!-- BOTÓN IMPRIMIR -->
+  <button class="btn-print" onclick="window.print()">
+    🖨 Imprimir / Guardar PDF
+  </button>
+
+</div>
+
+</body>
+</html>`);
+
+    w.document.close();
 }
 
 /* SAFE */

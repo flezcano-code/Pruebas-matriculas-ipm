@@ -567,58 +567,214 @@ function abrirReporte(i){
     /* Descomponer nombre del alumno en apellidos + nombres */
     /* Formato esperado en la planilla: "APELLIDO1 APELLIDO2, NOMBRES" o "NOMBRES APELLIDO1 APELLIDO2" */
     /* Intentamos separar por coma; si no hay coma dejamos todo en nombres */
-    const estudianteRaw = safe(d["Estudiante"]) || "";
-    let apPaterno = "", apMaterno = "", nombres = "";
+    /* =========================================================
+   DATOS REALES DESDE CSV
+========================================================= */
 
-    if(estudianteRaw.includes(",")){
-        const partes = estudianteRaw.split(",");
-        const apellidos = partes[0].trim().split(" ");
-        apPaterno = apellidos[0] || "";
-        apMaterno = apellidos.slice(1).join(" ") || "";
-        nombres   = partes[1].trim();
+/* Nombre alumno */
+const estudianteRaw =
+    d["Estudiante"]
+    || d["Alumno"]
+    || "";
+
+/* =========================================================
+   SEPARAR NOMBRES Y APELLIDOS
+   FORMATO:
+   Alison Arira Letelier Nuñez
+========================================================= */
+
+let apPaterno = "";
+let apMaterno = "";
+let nombres = "";
+
+const partesNombre =
+    estudianteRaw
+    .trim()
+    .split(/\s+/);
+
+if(partesNombre.length >= 4){
+
+    apPaterno =
+        partesNombre[2] || "";
+
+    apMaterno =
+        partesNombre[3] || "";
+
+    nombres =
+        partesNombre[0] + " " + partesNombre[1];
+
+}
+else if(partesNombre.length === 3){
+
+    nombres =
+        partesNombre[0];
+
+    apPaterno =
+        partesNombre[1];
+
+    apMaterno =
+        partesNombre[2];
+
+}
+else{
+
+    nombres = estudianteRaw;
+}
+
+/* =========================================================
+   FECHA NACIMIENTO
+========================================================= */
+
+const fnRaw =
+    d["Fecha Nacimiento"]
+    || d["Fecha nacimiento"]
+    || "";
+
+/* =========================================================
+   SEXO
+========================================================= */
+
+const sexoTexto =
+    (
+        d["Sexo"]
+        || d["sexo"]
+        || d["Género"]
+        || d["Genero"]
+        || ""
+    )
+    .toString()
+    .toLowerCase();
+
+let sexoCod = "";
+
+if(
+    sexoTexto.includes("f")
+    ||
+    sexoTexto.includes("mujer")
+){
+
+    sexoCod = "2";
+
+}
+else if(
+    sexoTexto.includes("m")
+    ||
+    sexoTexto.includes("hombre")
+){
+
+    sexoCod = "1";
+}
+
+/* =========================================================
+   DOMICILIO
+========================================================= */
+
+let domicilioCompleto =
+    d["Domicilio"]
+    || d["Direccion"]
+    || d["Dirección"]
+    || "";
+
+/* quitar número */
+domicilioCompleto =
+    domicilioCompleto
+    .replace(/\d+/g,"")
+    .trim();
+
+/* =========================================================
+   COMUNA
+========================================================= */
+
+const comunaAlumno =
+    d["Comuna"]
+    || d["Ciudad"]
+    || "Copiapó";
+
+/* =========================================================
+   EDAD AUTOMÁTICA
+========================================================= */
+
+let edad = "";
+
+if(fnRaw){
+
+    let fn;
+
+    if(fnRaw.includes("-")){
+
+        const p = fnRaw.split("-");
+
+        fn = new Date(
+            p[2],
+            p[1]-1,
+            p[0]
+        );
+
     } else {
-        /* Sin coma: asumir "NOMBRE(S) APELLIDO1 APELLIDO2" no es posible distinguir,
-           ponemos todo en nombres y dejamos apellidos en blanco para edición manual */
-        nombres = estudianteRaw;
+
+        fn = new Date(fnRaw);
     }
 
-    /* Calcular edad a partir de Fecha Nacimiento */
-    let edad = "";
-    const fnRaw = d["Fecha Nacimiento"] || "";
-    if(fnRaw){
-        /* soporta dd/mm/aaaa o aaaa-mm-dd */
-        let fn;
-        if(fnRaw.includes("/")){
-            const p = fnRaw.split("/");
-            fn = new Date(p[2], p[1]-1, p[0]);
-        } else {
-            fn = new Date(fnRaw);
+    if(!isNaN(fn)){
+
+        const hoy = new Date();
+
+        edad =
+            hoy.getFullYear()
+            - fn.getFullYear();
+
+        const m =
+            hoy.getMonth()
+            - fn.getMonth();
+
+        if(
+            m < 0
+            ||
+            (
+                m === 0
+                &&
+                hoy.getDate() < fn.getDate()
+            )
+        ){
+            edad--;
         }
-        if(!isNaN(fn)){
-            let e = ahora.getFullYear() - fn.getFullYear();
-            const m = ahora.getMonth() - fn.getMonth();
-            if(m < 0 || (m===0 && ahora.getDate() < fn.getDate())) e--;
-            edad = e;
-        }
     }
+}
 
-    /* Fecha nacimiento formateada para casillas individuales */
-    let fnDia="", fnMes="", fnAnioFull="";
-    if(fnRaw.includes("/")){
-        const p = fnRaw.split("/");
-        fnDia  = p[0] || "";
-        fnMes  = p[1] || "";
-        fnAnioFull = p[2] || "";
-    }
+/* =========================================================
+   FECHA NACIMIENTO SEPARADA
+========================================================= */
 
-    /* RUN separado del dígito verificador */
-    const runRaw = safe(d["RUN / IPE"]) || "";
-    /* quitar puntos */
-    const runClean = runRaw.replace(/\./g,"");
+let fnDia = "";
+let fnMes = "";
+let fnAnioFull = "";
 
-    /* Sexo → código 1(M) / 2(F) */
-    const sexoRaw = (d["Sexo"] || "").toUpperCase();
-    const sexoCod = sexoRaw.startsWith("F") ? "2" : sexoRaw.startsWith("M") ? "1" : "";
+if(fnRaw.includes("-")){
+
+    const p = fnRaw.split("-");
+
+    fnDia = p[0] || "";
+    fnMes = p[1] || "";
+    fnAnioFull = p[2] || "";
+}
+
+/* =========================================================
+   RUN
+========================================================= */
+
+const runRaw =
+    d["RUN / IPE"]
+    || d["RUN"]
+    || "";
+
+const runClean =
+    runRaw
+    .replace(/\./g,"")
+    .replace("-","");
+
+/* =========================================================
+   FIN BLOQUE DATOS
+========================================================= */
 
     /* Helper: crea una casilla tipo cuadrado con un carácter */
     function box(val, w){

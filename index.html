@@ -804,20 +804,31 @@ const runClean =
 ========================================================= */
 
     /* Helper: crea una casilla tipo cuadrado con un carácter */
-    function box(val, w){
-        w = w || "22px";
-        return `<span style="
-            display:inline-block;
+function box(val, w){
+
+    w = w || "22px";
+
+    return `
+    <span
+        contenteditable="true"
+        spellcheck="false"
+        style="
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
             width:${w};
             height:22px;
             border:1px solid black;
             text-align:center;
             font-size:11px;
-            line-height:22px;
             font-family:Arial;
             vertical-align:middle;
-        ">${val||""}</span>`;
-    }
+            overflow:hidden;
+            white-space:nowrap;
+            outline:none;
+        "
+    >${val || ""}</span>`;
+}
 
     /* Helper: casillas para cada carácter de un string */
     function boxes(str, n){
